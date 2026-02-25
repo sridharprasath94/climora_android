@@ -1,6 +1,7 @@
 
 package com.flash.climora.di
 
+import com.flash.climora.BuildConfig
 import com.flash.climora.data.remote.WeatherApi
 import com.flash.climora.data.repository.WeatherRepositoryImpl
 import com.flash.climora.domain.repository.WeatherRepository
@@ -22,7 +23,7 @@ object AppModule {
     @Singleton
     fun provideRetrofit(): Retrofit =
         Retrofit.Builder()
-            .baseUrl("https://api.weatherapi.com/v1/")
+            .baseUrl(BuildConfig.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 

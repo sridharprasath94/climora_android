@@ -53,3 +53,4 @@ captures/
 
 # Temporary files
 *.tmp
+/app/sampledata/

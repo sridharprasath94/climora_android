@@ -33,6 +33,15 @@ android {
             "API_KEY",
             "\"$apiKey\""
         )
+
+        buildTypes {
+            debug {
+                buildConfigField("String", "BASE_URL", "\"https://api.weatherapi.com/v1/\"")
+            }
+            release {
+                buildConfigField("String", "BASE_URL", "\"https://api.weatherapi.com/v1/\"")
+            }
+        }
     }
     kotlin {
         compilerOptions {
@@ -64,6 +73,8 @@ dependencies {
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
