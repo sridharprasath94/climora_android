@@ -78,13 +78,13 @@ class MainActivity : AppCompatActivity() {
                 viewModel.state.collect { state ->
                     when (state) {
                         is WeatherUiState.Loading -> {
-                            // Disable searching while loading
                             setSearchEnabled(false)
-                            // Hide weather data while loading to avoid stale UI
                             setWeatherViewsVisible(false)
+                            binding.loadingOverlay.visibility = View.VISIBLE
                         }
 
                         is WeatherUiState.Success -> {
+                            binding.loadingOverlay.visibility = View.GONE
                             dismissErrorDialog()
 
                             val weather = state.weather
@@ -113,6 +113,7 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         is WeatherUiState.Error -> {
+                            binding.loadingOverlay.visibility = View.GONE
                             // Clear UI + hide weather details
                             clearWeatherUi()
                             setWeatherViewsVisible(false)
