@@ -64,7 +64,12 @@ class MainActivity : AppCompatActivity() {
                         binding.textCity.text = weather.cityName
 
                         // Set weather icon (ensure you map icon properly in domain layer)
-//                        binding.imageCondition.setImageResource(weather.conditionCode)
+                        val iconRes = weatherIconRes(
+                            conditionCode = weather.conditionCode,
+                            isDay = weather.isDay
+                        )
+                        binding.imageCondition.visibility = android.view.View.VISIBLE
+                        binding.imageCondition.setImageResource(iconRes)
 
                         // Switch background based on day/night
                         if (weather.isDay) {
@@ -79,6 +84,7 @@ class MainActivity : AppCompatActivity() {
                     is WeatherUiState.Error -> {
                         binding.textTemperature.text = "--"
                         binding.textCity.text = state.message
+                        binding.imageCondition.visibility = android.view.View.INVISIBLE
                     }
 
                     else -> Unit
