@@ -9,16 +9,35 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import com.flash.climora.core.Result
+import com.flash.climora.domain.location.LocationProvider
 import com.flash.climora.presentation.error.toUiMessage
 import javax.inject.Inject
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
+    private val locationProvider: LocationProvider,
     private val getWeatherUseCase: GetCurrentWeatherUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<WeatherUiState>(WeatherUiState.Idle)
     val state: StateFlow<WeatherUiState> = _state
+
+    fun fetchWeatherByLocation() {
+        viewModelScope.launch {
+            _state.value = WeatherUiState.Loading
+
+            val result = locationProvider.getCurrentLocation()
+
+            result.onSuccess { coordinates ->
+                fetchWeatherByCoordinates(
+                    coordinates.latitude,
+                    coordinates.longitude
+                )
+            }.onFailure {
+                _state.value = WeatherUiState.Error("Location failed")
+            }
+        }
+    }
 
     fun fetchWeather(city: String) {
         viewModelScope.launch {

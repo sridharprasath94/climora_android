@@ -17,8 +17,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.flash.climora.R
 import com.flash.climora.databinding.ActivityMainBinding
 import com.flash.climora.domain.model.Weather
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -28,9 +26,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val viewModel: WeatherViewModel by viewModels()
 
-    private val fusedLocationClient by lazy {
-        LocationServices.getFusedLocationProviderClient(this)
-    }
 
     private var errorDialog: AlertDialog? = null
 
@@ -38,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     private val locationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             if (granted) {
-                fetchLocationWeather()
+                viewModel.fetchWeatherByLocation()
             } else {
                 setSearchEnabled(true)
                 showErrorDialog("Location permission denied. You can still search by city.")
@@ -165,7 +160,7 @@ class MainActivity : AppCompatActivity() {
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED -> {
-                fetchLocationWeather()
+                viewModel.fetchWeatherByLocation()
             }
 
             else -> locationPermissionLauncher.launch(
@@ -174,42 +169,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun fetchLocationWeather() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            handleLocationFailure()
-            return
-        }
-
-        try {
-            fusedLocationClient.getCurrentLocation(
-                Priority.PRIORITY_HIGH_ACCURACY,
-                null
-            ).addOnSuccessListener { location ->
-                if (location == null) {
-                    handleLocationFailure()
-                    return@addOnSuccessListener
-                }
-
-                viewModel.fetchWeatherByCoordinates(
-                    location.latitude,
-                    location.longitude
-                )
-            }.addOnFailureListener {
-                handleLocationFailure()
-            }
-        } catch (e: SecurityException) {
-            handleLocationFailure()
-        }
-    }
-
-    private fun handleLocationFailure() {
-        setSearchEnabled(true)
-        showErrorDialog("Unable to get current location. Please try again or search by city.")
-    }
 
     // --------------------------
     // UI Helpers
