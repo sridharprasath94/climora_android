@@ -1,11 +1,18 @@
 package com.flash.climora.presentation.weather
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.flash.climora.R
 import com.flash.climora.databinding.ActivityMainBinding
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -14,6 +21,10 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val viewModel: WeatherViewModel by viewModels()
+
+    private val fusedLocationClient by lazy {
+        LocationServices.getFusedLocationProviderClient(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +38,10 @@ class MainActivity : AppCompatActivity() {
                 viewModel.fetchWeather(city)
             }
             true
+        }
+
+        binding.buttonLocation.setOnClickListener {
+            requestLocationAndFetchWeather()
         }
 
         observeState()
@@ -69,6 +84,59 @@ class MainActivity : AppCompatActivity() {
                     else -> Unit
                 }
             }
+        }
+    }
+
+    private fun requestLocationAndFetchWeather() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                1001
+            )
+        } else {
+            getCurrentLocation()
+        }
+    }
+
+    private fun getCurrentLocation() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+
+        try {
+            fusedLocationClient.getCurrentLocation(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                null
+            ).addOnSuccessListener { location ->
+                location?.let {
+                    viewModel.fetchWeatherByCoordinates(it.latitude, it.longitude)
+                }
+            }
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1001 &&
+            grantResults.isNotEmpty() &&
+            grantResults[0] == PackageManager.PERMISSION_GRANTED
+        ) {
+            getCurrentLocation()
         }
     }
 }
