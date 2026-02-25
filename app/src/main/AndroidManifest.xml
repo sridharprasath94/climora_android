@@ -7,6 +7,9 @@
 
     <application
         android:name=".ClimoraApp"
+        android:label="Climora"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
         android:allowBackup="true"
         android:theme="@style/Theme.Material3.DayNight.NoActionBar">
 
