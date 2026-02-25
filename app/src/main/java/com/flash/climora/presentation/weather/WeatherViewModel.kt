@@ -8,6 +8,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import com.flash.climora.core.Result
+import com.flash.climora.presentation.error.toUiMessage
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,12 +23,15 @@ class WeatherViewModel @Inject constructor(
     fun fetchWeather(city: String) {
         viewModelScope.launch {
             _state.value = WeatherUiState.Loading
-            try {
-                val weather = getWeatherUseCase(city)
-                _state.value = WeatherUiState.Success(weather)
-                Log.d("WeatherViewModel", "Weather fetched: $weather")
-            } catch (e: Exception) {
-                _state.value = WeatherUiState.Error("Something went wrong")
+            when (val result = getWeatherUseCase(city)) {
+
+                is Result.Success -> {
+                    _state.value = WeatherUiState.Success(result.data)
+                }
+
+                is Result.Error -> {
+                    _state.value = WeatherUiState.Error(result.error.toUiMessage())
+                }
             }
         }
     }
@@ -34,12 +39,15 @@ class WeatherViewModel @Inject constructor(
     fun fetchWeatherByCoordinates(lat: Double, lon: Double) {
         viewModelScope.launch {
             _state.value = WeatherUiState.Loading
-            try {
-                val weather = getWeatherUseCase(lat, lon)
-                _state.value = WeatherUiState.Success(weather)
-                Log.d("WeatherViewModel", "Weather fetched: $weather")
-            } catch (e: Exception) {
-                _state.value = WeatherUiState.Error("Something went wrong")
+            when (val result = getWeatherUseCase(lat, lon)) {
+
+                is Result.Success -> {
+                    _state.value = WeatherUiState.Success(result.data)
+                }
+
+                is Result.Error -> {
+                    _state.value = WeatherUiState.Error(result.error.toUiMessage())
+                }
             }
         }
     }
