@@ -46,6 +46,8 @@ captures/
 *.jks
 *.keystore
 
+.kotlin/
+
 # Kotlin metadata
 *.kotlin_metadata
 
