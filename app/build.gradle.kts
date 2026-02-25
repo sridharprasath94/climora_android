@@ -33,6 +33,15 @@ android {
             "API_KEY",
             "\"$apiKey\""
         )
+
+        buildTypes {
+            debug {
+                buildConfigField("String", "BASE_URL", "\"https://api.weatherapi.com/v1/\"")
+            }
+            release {
+                buildConfigField("String", "BASE_URL", "\"https://api.weatherapi.com/v1/\"")
+            }
+        }
     }
     kotlin {
         compilerOptions {
